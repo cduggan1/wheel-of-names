@@ -1,79 +1,115 @@
 <template>
-  <div
-    v-if="chartData && chartData.length"
-    style="margin-bottom: 20px; display: flex; align-items: center; overflow: hidden"
-  >
-    {{ angle }}
+  <v-container fill-height>
+    <v-card class="mx-auto" prepend-icon="$vuetify" subtitle="Written in Vue.JS">
+      <template v-slot:title>
+        <span class="font-weight-black">Spin the Wheel!</span>
+      </template>
+      <h6 style="margin-left: 10px; color: red; position: absolute; top: 10px; left: 10px">
+        {{ Math.floor(angle) }}
+      </h6>
+      <v-divider :thickness="2"></v-divider>
 
-    <div
-      :class="{ 'spin-container': isSpinning, 'no-spin': !isSpinning }"
-      :style="{ transform: 'rotate(' + angle + 'deg)' }"
-    >
-      <apexchart type="pie" :options="chartOptions" :series="chartData" height="500" />
-    </div>
-    <svg-icon color="red" :path="mdiArrowLeftBold" size="150" style="margin-left: -75px" />
-  </div>
+      <div
+        v-if="!chartData || !chartData.length"
+        style="
+          margin-bottom: 200px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+        "
+      ></div>
 
-  <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center">
-    <input
-      v-model="newName"
-      placeholder="Enter a name"
-      style="font-size: 20px; padding: 10px; width: 300px; text-align: center"
-      @keyup.enter="addName"
-    />
-    <v-btn
-      @click="addName"
-      style="
-        margin: 10px;
-        font-size: 20px;
-        padding: 10px 20px;
-        background-color: #333;
-        color: white;
-      "
-      >Add</v-btn
-    >
-    <v-btn
-      @click="removeLastData"
-      style="
-        margin: 10px;
-        font-size: 20px;
-        padding: 10px 20px;
-        background-color: #333;
-        color: white;
-      "
-      >Remove Last</v-btn
-    >
-    <v-btn
-      @click="resetData"
-      style="
-        margin: 10px;
-        font-size: 20px;
-        padding: 10px 20px;
-        background-color: #333;
-        color: white;
-      "
-      >Reset</v-btn
-    >
-    <v-btn
-      @click="startSpinning"
-      style="
-        margin: 10px;
-        font-size: 20px;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-      "
-      >Start Spin</v-btn
-    >
-  </div>
+      <div
+        v-if="chartData && chartData.length"
+        style="
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+        "
+      >
+        <div
+          :class="{ 'spin-container': isSpinning, 'no-spin': !isSpinning }"
+          :style="{ transform: 'rotate(' + angle + 'deg)' }"
+        >
+          <apexchart type="pie" :options="chartOptions" :series="chartData" height="500" />
+        </div>
+        <svg-icon color="red" :path="mdiArrowLeftBold" size="150" style="margin-left: -75px" />
+      </div>
+      <v-card-actions>
+        <v-text-field
+          v-model="newName"
+          placeholder="Enter a name"
+          hide-details
+          variant="outlined"
+          :loading="isSpinning"
+          :disabled="isSpinning"
+          style="max-width: 300px"
+          @keyup.enter="addName"
+          @click:append-inner="addName"
+          color="primary"
+        >
+        </v-text-field>
+
+        <v-btn
+          icon
+          color="error"
+          @click="addName"
+          :disabled="isSpinning"
+          style="
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <svg-icon color="green" :path="mdiPlus" />
+        </v-btn>
+        <v-btn
+          icon
+          color="error"
+          @click="removeLastData"
+          :disabled="isSpinning"
+          style="
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <svg-icon color="black" :path="mdiMinus" />
+        </v-btn>
+
+        <v-btn :disabled="isSpinning" color="success" elevation="2" @click="startSpinning">
+          SPIN THE WHEEL!
+        </v-btn>
+
+        <h6 style="margin-left: 10px; color: red">{{ isSpinning ? 'Spinning...' : '' }}</h6>
+        <v-btn
+          :disabled="isSpinning"
+          color="danger"
+          style="margin:right:10px; color: red;"
+          elevation="2"
+          @click="startSpinning"
+        >
+          RESET
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
-import { mdiArrowLeftBold } from '@mdi/js'
+import { mdiArrowLeftBold, mdiPlus, mdiMinus, mdiSync } from '@mdi/js'
 import SvgIcon from 'vue3-icon'
-import { no } from 'vuetify/locale'
 
 export default defineComponent({
   name: 'SpinnerWheel',
@@ -83,7 +119,11 @@ export default defineComponent({
   },
   data() {
     return {
-      mdiArrowLeftBold: mdiArrowLeftBold,
+      onWinner: Function,
+      mdiArrowLeftBold,
+      mdiPlus,
+      mdiMinus,
+      mdiSync,
       isSpinning: false,
       angle: 0,
       chartOptions: {
@@ -101,11 +141,6 @@ export default defineComponent({
               enabled: true,
               delay: 150,
               speed: 350
-            },
-            events: {
-              dataPointSelection: (event) => {
-                event.stopPropagation()
-              }
             }
           }
         },
@@ -161,16 +196,17 @@ export default defineComponent({
 
         for (let i = 0; i < itemCount; i++) {
           if (itemDegree >= i * degreeSpan && itemDegree < (i + 1) * degreeSpan) {
+            this.isSpinning = false
             return this.chartOptions.labels[i]
           }
         }
-        this.isSpinning = false
       }
     },
     startSpinning() {
       this.isSpinning = true
       this.angle = 0
       this.targetAngle = Math.floor(Math.random() * (10000 - 1500) + 1500)
+      //   this.targetAngle = 720
       this.speed = 1
       this.incrementAngle()
     },
@@ -200,7 +236,7 @@ export default defineComponent({
     },
     computeWinner(angle) {
       const winner = this.getPointedItem(angle)
-      alert(`The winner is: ${winner}`)
+      this.$emit('onwinner', winner)
     },
     addName() {
       if (this.newName) {
@@ -231,11 +267,11 @@ export default defineComponent({
       this.chartOptions = { ...this.chartOptions }
     },
     calculateLabelFontSize() {
-      if (!this.chartData) return '32px'
+      if (!this.chartData) return '28px'
       const itemCount = this.chartData.length
-      if (itemCount === 0) return '32px'
+      if (itemCount === 0) return '28px'
       const baseSize = 32
-      const sizeReduction = itemCount > 10 ? (itemCount - 10) * 4 : 0
+      const sizeReduction = itemCount > 5 ? (itemCount - 4) * 2 : 0
       const answer = Math.max(baseSize - sizeReduction, 10) + 'px'
       return answer
     }
