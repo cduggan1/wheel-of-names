@@ -1,33 +1,106 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
+import SvgIcon from '@jamescoyle/vue-icon'
+import { mdiArrowLeftBold } from '@mdi/js'
+import MenuIcon from 'vue-material-design-icons/Menu.vue'
 
 const apexchart = VueApexCharts
 
 const chartOptions = ref({
   chart: {
-    type: 'pie'
+    type: 'pie',
+    animations: {
+      enabled: true,
+      easing: 'easeinout',
+      speed: 800,
+      animateGradually: {
+        enabled: true,
+        delay: 150
+      },
+      dynamicAnimation: {
+        enabled: true,
+        delay: 150,
+        speed: 350
+      }
+    }
   },
-  labels: ['Category 1', 'Category 2', 'Category 3'],
+  labels: [],
   title: {
-    text: 'Sample Pie Chart',
-    align: 'center'
+    text: 'Pie Chart',
+    align: 'center',
+    style: {
+      fontSize: '24px'
+    }
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: function (val, opts) {
+      return opts.w.globals.labels[opts.seriesIndex]
+    }
+  },
+  legend: {
+    show: false
   }
 })
 
-const chartData = ref([44, 55, 13])
+const chartData = ref([])
+const newName = ref('')
+
+const addName = () => {
+  if (newName.value) {
+    chartData.value.push(1)
+    chartOptions.value.labels.push(newName.value)
+    newName.value = ''
+  }
+}
+
+const removeLastData = () => {
+  if (chartData.value.length > 0) {
+    chartData.value.pop()
+    chartOptions.value.labels.pop()
+  }
+}
+
+const path = mdiArrowLeftBold
+
+const resetData = () => {
+  chartData.value = []
+  chartOptions.value.labels = []
+}
 </script>
 
 <template>
-  <header>
-    <apexchart type="pie" :options="chartOptions" :series="chartData" height="500" />
-  </header>
+  <div style="background-color: white; padding: 20px; height: 100vh">
+    <h1 style="text-align: center; font-size: 32px">Dynamic Pie Chart</h1>
+
+    <header style="text-align: center; margin-bottom: 20px; position: relative">
+      <apexchart
+        v-if="chartData && chartData.length"
+        type="pie"
+        :options="chartOptions"
+        :series="chartData"
+        height="500"
+      />
+      <menu-icon />
+    </header>
+
+    <div style="text-align: center; margin-top: 20px">
+      <input
+        v-model="newName"
+        placeholder="Enter a name"
+        style="font-size: 20px; padding: 10px; width: 300px"
+      />
+      <v-btn @click="addName" style="font-size: 20px; padding: 10px 20px">Add</v-btn>
+      <v-btn @click="removeLastData" style="font-size: 20px; padding: 10px 20px">Remove Last</v-btn>
+      <v-btn @click="resetData" style="font-size: 20px; padding: 10px 20px">Reset</v-btn>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
-  max-height: 100vh;
 }
 
 .logo {
