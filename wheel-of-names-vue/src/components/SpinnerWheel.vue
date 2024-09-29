@@ -2,7 +2,7 @@
   <v-container fill-height>
     <v-card class="mx-auto" prepend-icon="$vuetify" subtitle="Written in Vue.JS">
       <template v-slot:title>
-        <span class="font-weight-black">Spin the Wheel!</span>
+        <span class="font-weight-black">Wheel of Names!</span>
       </template>
       <h6 style="margin-left: 10px; color: red; position: absolute; top: 10px; left: 10px">
         {{ Math.floor(angle) }}
