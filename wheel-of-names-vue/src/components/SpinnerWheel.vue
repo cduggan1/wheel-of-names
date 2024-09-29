@@ -157,8 +157,7 @@ export default defineComponent({
         }
 
         const degreeSpan = 360 / itemCount
-        var itemDegree = normalizedAngle > 90 ? 270 - normalizedAngle : 90 - normalizedAngle
-        console.log('itemDegree', itemDegree)
+        var itemDegree = normalizedAngle < 90 ? 90 - normalizedAngle : 450 - normalizedAngle
 
         for (let i = 0; i < itemCount; i++) {
           if (itemDegree >= i * degreeSpan && itemDegree < (i + 1) * degreeSpan) {
